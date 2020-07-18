@@ -9,6 +9,178 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+List of resources we might want to get together and give people
+- themes https://ggplot2.tidyverse.org/reference/ggtheme.html
+- data viz book https://serialmentor.com/dataviz/visualizing-associations.html
+
+
+
+
+Workshop:
+https://github.com/allisonhorst/palmerpenguins
+
+Looking at hte data and seeing what's what
+```{r}
+#remotes::install_github("allisonhorst/palmerpenguins")
+
+library(palmerpenguins)
+library(ggplot2)
+library(tidyverse)
+data(package = 'palmerpenguins')
+```
+
+First things first before making any types of graphs is getting to know your data. For me knowing how many NA's there are and the class of each column/variable is the most important. Not knowing these things up front can cause weird things to happen (or things not to happen) so it's always good to know before hand. It's always best to know the strucutre of your data well enough that you know the general lay out of your plot. This step is skipped a lot beccause there's no real product that comes out of it and it takes a little bit of time. In the end though it's so worth it!
+
+Basic look into the data
+```{r}
+penguins <- penguins
+
+head(penguins)
+summary(penguins) ## take the chance to addess the NA values in each column
+```
+
+Talk about the different classes and how they might mess up plotting (numeric/ character, an NA might mess that up; factor vs character)
+
+Exploring classes
+```{r}
+# long way:
+class(penguins$species) ## factor
+
+# short way (would need a brief description of what lapply is..)
+lapply(penguins, class)
+## im actually not super sure when numeric versus integer comes into play for graphing... anyone?
+```
+
+Maybe before we jump right into making graphs we can have like 5ish minutes of people sugesting graphs now that we all know more about the data. For us we could brainstrom all the combos we can think of (right and wrong) and reasons for why it would work or not. This might be what we want them to do in the breakout rooms so maybe
+
+
+
+
+Ideas:
+
+- Maybe we want to do one plot showing NA values of a variable, like Allison did in her presentation for the lecturer position. I can't remember exactly how it's done but I do think it's like 1 line of code. We can show it as an option for aesetics as a reminder that sometimes graphs may lead the reader to a misleading conclusion if NA data is removed
+
+- have the end to bring it all together using facet option and people can put their graphs together
+
+End:
+scatterplot: 
+- 2 graphs 1 female penguins and 1 male penguins
+- x axis = body mass
+- y = flipper length
+- size of bill = aes size
+- species = color
+- island or year = shape
+
+End Plot
+```{r}
+# defintively have a code chunk where we include NA and then make the conciosu decision to not include it
+
+(penguins_plot <- ggplot(na.omit(penguins)) +
+   geom_point(aes(x = body_mass_g, y = flipper_length_mm, size = bill_length_mm, color = species, shape = island)) +
+   theme_minimal() +
+   
+   ## Labeling everything
+   labs(x = "Body Mass (g)",
+        y = "Flipper Length (mm)",
+        title = "Exploring Palmer Station Penguins",
+        subtitle = "Dimensions and Attributes for Adelie, Chinstrap, and Gentoos",
+        caption = "Data Source: Dr. Kristen Gorman LTER Palmer Station",
+        size = "Bill Length (mm)",
+        color = "Species") +
+   
+   ## Editing the labels aestetics
+
+   theme(plot.title = element_text(color = "black", size = 18, face = "bold", hjust = 0.5),
+         plot.subtitle = element_text(color = "gray41", size = 16, face = "bold", hjust = 0.5),
+         plot.caption = element_text(color = "gray65", face = "italic"),
+         axis.title.x = element_text(size = 15),
+         axis.title.y = element_text(size = 15)) +
+   
+   # change the size of the bill length shapes
+  scale_size(breaks = c(30, 35, 40, 45, 50, 55, 60),
+             range = c(1, 8)) +
+   ## cahnge colors
+   scale_colour_manual(values = c("#008A82", "#57280F", "#03304A"), aesthetics = "colour")+
+   facet_grid(cols = vars(sex)) 
+   
+)
+
+
+# 008A82, 57280F, 03304A
+## do we want to intoduce spcial themes with all the stuffi did above? or too advanced
+## I want to capitilize the male and female labels in the grid but i need to do levels(penguins$sex) <- c("Female", "Male") after doing levels(penguins$sex) to check order
+## OR I want to get rid of those titles and put in male or female symbols, can use ggtext thoretically to use picutrees instead https://github.com/wilkelab/ggtext
+
+
+##do we want to remove NAs? or plot them like allison did 
+
+unique(penguins$bill_length_mm)
+summary(penguins$bill_length_mm)
+
+ # scale_size(range = c("32.10", "39.23", "44.45", "43.92", "48.50", "59.60")) +
+```
+
+I'm having too much fun!
+text
+```{r}
+library(grid)
+
+t1 <- textGrob(expression("Dimensions and Attributes for "*phantom(bold("Adelie"))*", "*phantom(bold("Chinstrap"))*",and "*phantom(bold("Gentoos"))),
+               x = 0.5, y = 1.1, gp = gpar(col = "black"))
+
+t2 <- textGrob(expression(phantom("Dimensions and Attributes for ")*bold("Adelie")*", "*phantom(bold("Chinstrap"))*",and "*phantom(bold("Gentoos"))),
+               x = 0.5, y = 1.1, gp = gpar(col = "#008A82"))
+
+t3 <- textGrob(expression(phantom("Dimensions and Attributes for ")*phantom(bold("Adelie"))*", "*bold("Chinstrap")*",and "*phantom(bold("Gentoos"))),
+               x = 0.5, y = 1.1, gp = gpar(col = "#57280F"))
+
+t4 <- textGrob(expression(phantom("Dimensions and Attributes for ")*phantom(bold("Adelie"))*", "*phantom(bold("Chinstrap")) *",and "*bold("Gentoos")),
+               x = 0.5, y = 1.1, gp = gpar(col = "#03304A"))
+
+
+```
+
+trying to figure out how to color code the title. not working yet
+
+```{r}
+library(tidyverse)
+remotes::install_github("wilkelab/ggtext")
+library(ggtext)
+color <- c("#008A82", "#57280F", "#03304A")
+name <- c("adelie", "chinstrap", "gentoos")
+
+(penguins_plot <- ggplot(na.omit(penguins)) +
+   geom_point(aes(x = body_mass_g, y = flipper_length_mm, size = bill_length_mm, color = species, shape = island)) +
+   theme_minimal() +
+   
+   ## Labeling everything
+   labs(x = "Body Mass (g)",
+        y = "Flipper Length (mm)",
+        title = "Dimensions and attributes for <b style='color:{color}'>{name}</b>, <b style='color:{color}'>{name}</b>, and <b style='color:{color}'>{name}</b>",
+        caption = "Data Source: Dr. Kristen Gorman LTER Palmer Station",
+        size = "Bill Length (mm)",
+        color = "Species") +
+   
+   ## Editing the labels aestetics
+
+   theme(plot.title = element_text(color = "black", size = 18, face = "bold", hjust = 0.5),
+         plot.subtitle = element_text(color = "gray41", size = 16, face = "bold", hjust = 0.5),
+         plot.caption = element_text(color = "gray65", face = "italic"),
+         axis.title.x = element_text(size = 15),
+         axis.title.y = element_text(size = 15)) +
+   
+   
+   # change the size of the bill length shapes
+  scale_size(breaks = c(30, 35, 40, 45, 50, 55, 60),
+             range = c(1, 8)) +
+   ## cahnge colors
+   scale_colour_manual(values = c("#008A82", "#57280F", "#03304A"), aesthetics = "colour")+
+   facet_grid(cols = vars(sex)) 
+   
+)
+
+```
+
 
 
 
