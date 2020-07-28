@@ -12,5 +12,20 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(tidyverse)
 library(palmerpenguins)
+
+data("penguins")
+```
+
+I think I'm going to do counts across years?
+
+```{r}
+penguin_counts <- penguins %>% 
+  group_by(year, island, species) %>% 
+  summarize(counts = length(year))
+  
+ggplot(penguin_counts, aes(x = as.factor(year), y = counts, color = island)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~species)
 ```
 
