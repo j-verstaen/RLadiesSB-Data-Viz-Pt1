@@ -12,14 +12,13 @@ knitr::opts_chunk$set(echo = TRUE)
 List of resources we might want to get together and give people
 - themes https://ggplot2.tidyverse.org/reference/ggtheme.html
 - data viz book https://serialmentor.com/dataviz/visualizing-associations.html
-
-
+- https://www.data-to-viz.com/about.html
 
 
 Workshop:
 https://github.com/allisonhorst/palmerpenguins
 
-Looking at hte data and seeing what's what
+Looking at the data and seeing what's what
 ```{r}
 #remotes::install_github("allisonhorst/palmerpenguins")
 
@@ -51,9 +50,7 @@ lapply(penguins, class)
 ## im actually not super sure when numeric versus integer comes into play for graphing... anyone?
 ```
 
-Maybe before we jump right into making graphs we can have like 5ish minutes of people sugesting graphs now that we all know more about the data. For us we could brainstrom all the combos we can think of (right and wrong) and reasons for why it would work or not. This might be what we want them to do in the breakout rooms so maybe
-
-
+Maybe before we jump right into making graphs we can have like 5ish minutes of people suggesting graphs now that we all know more about the data. For us we could brain strom all the combos we can think of (right and wrong) and reasons for why it would work or not. This might be what we want them to do in the breakout rooms so maybe
 
 
 Ideas:
@@ -62,28 +59,21 @@ Ideas:
 
 - have the end to bring it all together using facet option and people can put their graphs together
 
-End:
-scatterplot: 
-- 2 graphs 1 female penguins and 1 male penguins
-- x axis = body mass
-- y = flipper length
-- size of bill = aes size
-- species = color
-- island or year = shape
 
-End Plot
+
+
 ```{r}
 # defintively have a code chunk where we include NA and then make the conciosu decision to not include it
 
 (penguins_plot <- ggplot(na.omit(penguins)) +
-   geom_point(aes(x = body_mass_g, y = flipper_length_mm, size = bill_length_mm, color = species, shape = island)) +
+   geom_point(aes(x = body_mass_g, y = flipper_length_mm, color = species, shape = island)) +
    theme_minimal() +
    
    ## Labeling everything
    labs(x = "Body Mass (g)",
         y = "Flipper Length (mm)",
         title = "Exploring Palmer Station Penguins",
-        subtitle = "Dimensions and Attributes for Adelie, Chinstrap, and Gentoos",
+        subtitle = "Dimensions and Attributes",
         caption = "Data Source: Dr. Kristen Gorman LTER Palmer Station",
         size = "Bill Length (mm)",
         color = "Species") +
@@ -91,7 +81,7 @@ End Plot
    ## Editing the labels aestetics
 
    theme(plot.title = element_text(color = "black", size = 18, face = "bold", hjust = 0.5),
-         plot.subtitle = element_text(color = "gray41", size = 16, face = "bold", hjust = 0.5),
+         plot.subtitle = element_text(color = "gray41", size = 14, face = "bold", hjust = 0.5),
          plot.caption = element_text(color = "gray65", face = "italic"),
          axis.title.x = element_text(size = 15),
          axis.title.y = element_text(size = 15)) +
@@ -104,6 +94,53 @@ End Plot
    facet_grid(cols = vars(sex)) 
    
 )
+```
+
+Can also add: 
+- capitilize the male and female labels in the grid but i need to do levels(penguins$sex) <- c("Female", "Male") after doing levels(penguins$sex) to check order
+- or  get rid of those titles and put in male or female symbols, can use ggtext thoretically to use picutrees instead https://github.com/wilkelab/ggtext
+- add a mean line 
+
+
+## Bar plot:
+- stacked bar plot for each of the three years with total penguins on the y axis and three chunks of colors for the three penguins, also do it by island
+
+```{r}
+
+penguins_sampled <- penguins %>% 
+   mutate(island_add = "Island") %>% 
+   unite(island_species, c("species", "island"), sep = " on ", remove = FALSE) %>% 
+   unite(island_species, c("island_species", "island_add"), sep = " ") %>% 
+   mutate(island_species = fct_relevel(island_species, levels = c("Adelie on Biscoe Island", "Gentoo on Biscoe Island", "Adelie on Dream Island", "Chinstrap on Dream Island", "Adelie on Torgersen Island"))) %>% 
+   mutate(year = as.character(year))
+
+colors <- c("#B35B91", "#F0C6E7", "#B1611A", "#F5E3C6", "#4EBCD3")
+
+
+class(penguins_sampled$year)
+
+ggplot(na.omit(penguins_sampled)) +
+  stat_count(aes(x=year, fill=island_species), stat="identity", width = 0.6) +
+# geom_text(aes(label = 'island'))
+   theme_minimal() +
+   labs(x = "Year",
+        y = "Sample Count",
+        title = "Number of Penguins Sampled") + 
+   scale_fill_manual(values = colors, aesthetics = "fill") 
+
+
+```
+
+biscoe (A, G)
+dream (s, c)
+torgersen (a)
+
+order factor (bis A, bis G, dream s, dream c, torg a)
+
+
+## scatter with correlation line
+- geom point with bill size and weight, correlation line. bring the point home that you should really explore the data. do one with all the penguins and a line, and then one with 3 lines by penguins. will show that one of the penguins just has a smaller bill size and that you can't generalize by all penguins. maybe do one by penguin species and gender
+- remember, it can be really easy to make plots and assume because it looks like something is happening or not that that is the case because you can see it! always explore your data and play around with it, and think critically about what what your doing actually means and why
 
 
 # 008A82, 57280F, 03304A
@@ -118,29 +155,11 @@ unique(penguins$bill_length_mm)
 summary(penguins$bill_length_mm)
 
  # scale_size(range = c("32.10", "39.23", "44.45", "43.92", "48.50", "59.60")) +
-```
-
-I'm having too much fun!
-text
-```{r}
-library(grid)
-
-t1 <- textGrob(expression("Dimensions and Attributes for "*phantom(bold("Adelie"))*", "*phantom(bold("Chinstrap"))*",and "*phantom(bold("Gentoos"))),
-               x = 0.5, y = 1.1, gp = gpar(col = "black"))
-
-t2 <- textGrob(expression(phantom("Dimensions and Attributes for ")*bold("Adelie")*", "*phantom(bold("Chinstrap"))*",and "*phantom(bold("Gentoos"))),
-               x = 0.5, y = 1.1, gp = gpar(col = "#008A82"))
-
-t3 <- textGrob(expression(phantom("Dimensions and Attributes for ")*phantom(bold("Adelie"))*", "*bold("Chinstrap")*",and "*phantom(bold("Gentoos"))),
-               x = 0.5, y = 1.1, gp = gpar(col = "#57280F"))
-
-t4 <- textGrob(expression(phantom("Dimensions and Attributes for ")*phantom(bold("Adelie"))*", "*phantom(bold("Chinstrap")) *",and "*bold("Gentoos")),
-               x = 0.5, y = 1.1, gp = gpar(col = "#03304A"))
 
 
-```
 
-trying to figure out how to color code the title. not working yet
+#############
+
 
 ```{r}
 library(tidyverse)
@@ -156,14 +175,13 @@ name <- c("adelie", "chinstrap", "gentoos")
    ## Labeling everything
    labs(x = "Body Mass (g)",
         y = "Flipper Length (mm)",
-        title = "Dimensions and attributes for <b style='color:{color}'>{name}</b>, <b style='color:{color}'>{name}</b>, and <b style='color:{color}'>{name}</b>",
+        title = "Dimensions and attributes for <b style='color:#008A82'>adelie,</b> <b style='color:#57280F'>chinstrap,</b> and <b style='color:#03304A'>gentoos</b>",
         caption = "Data Source: Dr. Kristen Gorman LTER Palmer Station",
         size = "Bill Length (mm)",
         color = "Species") +
    
    ## Editing the labels aestetics
-
-   theme(plot.title = element_text(color = "black", size = 18, face = "bold", hjust = 0.5),
+      theme(plot.title = element_markdown(hjust = .3),
          plot.subtitle = element_text(color = "gray41", size = 16, face = "bold", hjust = 0.5),
          plot.caption = element_text(color = "gray65", face = "italic"),
          axis.title.x = element_text(size = 15),
