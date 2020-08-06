@@ -23,9 +23,19 @@ penguin_counts <- penguins %>%
   group_by(year, island, species) %>% 
   summarize(counts = length(year))
   
-ggplot(penguin_counts, aes(x = as.factor(year), y = counts, color = island)) +
-  geom_point() +
-  geom_line() +
-  facet_wrap(~species)
+ggplot(penguin_counts, aes(x = as.factor(year), y = counts)) +
+  geom_segment(aes(x = as.factor(year), xend = as.factor(year), y = 0, yend = counts)) +
+  geom_point(aes(color = species), size = 2) +
+  facet_wrap(~island)
+```
+
+```{r}
+penguin_counts_island <- penguins %>% 
+  group_by(year, species) %>% 
+  summarize(counts = length(species))
+
+ggplot(penguin_counts_island, aes(x = as.numeric(year), y = counts)) +
+  geom_point(aes(color = species)) +
+  geom_line(aes(color = species))
 ```
 
