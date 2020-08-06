@@ -28,7 +28,7 @@ library(tidyverse)
 data(package = 'palmerpenguins')
 ```
 
-First things first before making any types of graphs is getting to know your data. For me knowing how many NA's there are and the class of each column/variable is the most important. Not knowing these things up front can cause weird things to happen (or things not to happen) so it's always good to know before hand. It's always best to know the strucutre of your data well enough that you know the general lay out of your plot. This step is skipped a lot beccause there's no real product that comes out of it and it takes a little bit of time. In the end though it's so worth it!
+First things first before making any types of graphs is getting to know your data. For me knowing how many NA's there are and the class of each column/variable is the most important. Not knowing these things up front can cause weird things to happen (or things not to happen) so it's always good to know before hand. It's always best to know the structure of your data well enough that you know the general lay out of your plot. This step is skipped a lot beccause there's no real product that comes out of it and it takes a little bit of time. In the end though it's so worth it!
 
 Basic look into the data
 ```{r}
@@ -58,7 +58,6 @@ Ideas:
 - Maybe we want to do one plot showing NA values of a variable, like Allison did in her presentation for the lecturer position. I can't remember exactly how it's done but I do think it's like 1 line of code. We can show it as an option for aesetics as a reminder that sometimes graphs may lead the reader to a misleading conclusion if NA data is removed
 
 - have the end to bring it all together using facet option and people can put their graphs together
-
 
 
 
@@ -163,39 +162,40 @@ summary(penguins$bill_length_mm)
 
 ```{r}
 library(tidyverse)
-remotes::install_github("wilkelab/ggtext")
-library(ggtext)
-color <- c("#008A82", "#57280F", "#03304A")
-name <- c("adelie", "chinstrap", "gentoos")
+library(hrbrthemes)
+# remotes::install_github("wilkelab/ggtext")
+# library(ggtext)
+
+# color <- c("#008A82", "#57280F", "#03304A")
 
 (penguins_plot <- ggplot(na.omit(penguins)) +
-   geom_point(aes(x = body_mass_g, y = flipper_length_mm, size = bill_length_mm, color = species, shape = island)) +
-   theme_minimal() +
+   geom_point(aes(x = body_mass_g, y = flipper_length_mm, color = species)) +
+   theme_ipsum_rc() +
    
    ## Labeling everything
    labs(x = "Body Mass (g)",
         y = "Flipper Length (mm)",
-        title = "Dimensions and attributes for <b style='color:#008A82'>adelie,</b> <b style='color:#57280F'>chinstrap,</b> and <b style='color:#03304A'>gentoos</b>",
+        title = "Dimensions for <b style='color:#008A82'>adelie,</b> <b style='color:#57280F'>chinstrap,</b> and <b style='color:#03304A'>gentoos</b> penguins",
         caption = "Data Source: Dr. Kristen Gorman LTER Palmer Station",
         size = "Bill Length (mm)",
         color = "Species") +
    
    ## Editing the labels aestetics
       theme(plot.title = element_markdown(hjust = .3),
-         plot.subtitle = element_text(color = "gray41", size = 16, face = "bold", hjust = 0.5),
-         plot.caption = element_text(color = "gray65", face = "italic"),
-         axis.title.x = element_text(size = 15),
-         axis.title.y = element_text(size = 15)) +
-   
-   
-   # change the size of the bill length shapes
-  scale_size(breaks = c(30, 35, 40, 45, 50, 55, 60),
-             range = c(1, 8)) +
+           # plot.subtitle = element_text(color = "gray41", size = 16, face = "bold", hjust = 0.5),
+            plot.caption = element_text(color = "gray65", face = "italic", size = 8),
+           # axis.title.y = element_text(size = 15),
+            legend.position = "none") +
+
+  #  # change the size of the bill length shapes
+  # scale_size(breaks = c(30, 35, 40, 45, 50, 55, 60),
+  #            range = c(1, 8)) +
    ## cahnge colors
    scale_colour_manual(values = c("#008A82", "#57280F", "#03304A"), aesthetics = "colour")+
    facet_grid(cols = vars(sex)) 
-   
 )
+   
+
 
 ```
 
