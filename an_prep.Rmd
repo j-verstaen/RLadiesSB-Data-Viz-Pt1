@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(tidyverse)
 library(palmerpenguins)
+library(patchwork)
 
 data("penguins")
 ```
@@ -23,10 +24,28 @@ penguin_counts <- penguins %>%
   group_by(year, island, species) %>% 
   summarize(counts = length(year))
   
-ggplot(penguin_counts, aes(x = as.factor(year), y = counts)) +
+biscoe <- ggplot(penguin_counts %>% filter(island == "Biscoe"), aes(x = as.factor(year), y = counts)) +
   geom_segment(aes(x = as.factor(year), xend = as.factor(year), y = 0, yend = counts)) +
   geom_point(aes(color = species), size = 2) +
-  facet_wrap(~island)
+  facet_wrap(~species)
+biscoe
+
+torgersen <- ggplot(penguin_counts %>% filter(island == "Torgersen"), aes(x = as.factor(year), y = counts)) +
+  geom_segment(aes(x = as.factor(year), xend = as.factor(year), y = 0, yend = counts)) +
+  geom_point(aes(color = species), size = 2)
+torgersen
+
+dream <- ggplot(penguin_counts %>% filter(island == "Dream"), aes(x = as.factor(year), y = counts)) +
+  geom_segment(aes(x = as.factor(year), xend = as.factor(year), y = 0, yend = counts)) +
+  geom_point(aes(color = species), size = 2) +
+  facet_wrap(~species)
+dream
+
+grid <- biscoe / 
+  (torgersen + plot_spacer()) / 
+  dream + 
+  plot_layout(heights = c(1, 2, 1))
+grid
 ```
 
 ```{r}
