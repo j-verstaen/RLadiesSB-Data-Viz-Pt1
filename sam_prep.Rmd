@@ -1,0 +1,133 @@
+---
+title: "sam_prep"
+author: "Sam Csik"
+date: "7/30/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Find the GitHub repo for the `palmerpenguins` package [here](https://github.com/allisonhorst/palmerpenguins)!
+
+Useful data viz resources:
+[Fundamentals of Data Vizualization](https://serialmentor.com/dataviz/index.html) by Claus O. Wilke
+
+[R for Data Science, Chapter 3](https://r4ds.had.co.nz/data-visualisation.html) by Garrett Frolemund & Hadley Wickham
+
+[`stat_summary()` Tutorial](https://ggplot2tutor.com/summary_statistics/summary_statistics/) by Christian Burkhart
+
+[ggplot2 cheat sheet](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
+
+Fine-tuning your plots usually involves adjusting components in `theme()`. See the full list of possibilities [here](https://ggplot2.tidyverse.org/reference/theme.html).
+
+####**Part 0.** Import libraries
+```{r}
+library(palmerpenguins) 
+library(tidyverse)
+library(naniar)
+```
+
+####**Part 1.** Longer way: Summarize data for plotting, then construct figure
+```{r}
+##############################
+# summarize body mass data (mean, max, min)
+##############################
+
+bm_summary <- penguins %>% 
+  drop_na() %>% # from naniar package
+  group_by(species, sex) %>% 
+  summarize(
+    mean = mean(body_mass_g),
+    sd = sd(body_mass_g)
+  )
+
+##############################
+# plot
+##############################
+
+ggplot() +
+  
+  # plot raw data
+  geom_point(data = na.omit(penguins), aes(x = species, y = body_mass_g, shape = sex), 
+             alpha = 0.1, 
+             position = position_jitterdodge(dodge.width = 0.8)) +
+  
+  # layer on summary stats
+  geom_errorbar(data = bm_summary, aes(x = species, ymin = mean - sd, ymax = mean + sd, color = species, group = sex), 
+                width = 0.1, size = 1,
+                position = position_dodge(width = 0.8)) +
+  geom_point(data = bm_summary, aes(x = species, y = mean, shape = sex, color = species),
+             size = 4,
+             position = position_dodge(width = 0.8)) +
+  
+  # manually adjust colors and shapes (gotta reflect what's up )
+  scale_color_manual(values = c("darkorange", "purple", "cyan4"), guide = FALSE) + # set `guide = FALSE` to omit from legend
+  scale_shape_manual(values = c(15, 16), name = "Sex") + # set `name =` to change legend title
+  
+  # add nicer axis labels + caption
+  labs(x = "Penguin Species", 
+       y = "Body Mass (g)",
+       caption = "Data Source: Dr. Kristen Gorman, LTER Palmer Station") +
+  
+  # now fun with themes!
+  theme_classic() +
+  theme(
+        # text
+        axis.text = element_text(color = "black", size = 10), 
+        axis.title = element_text(size = 14), 
+        plot.caption = element_text(size = 7, hjust = 1, color = "gray", face = "italic"),
+        # plot
+        panel.border = element_rect(colour = "black", size = 0.7, fill = NA), 
+        # legend
+        legend.position = c(0.1, 0.9), # (right/left, top/bottom)
+        legend.box.background = element_rect(color = "black", size = 1.1)
+        ) 
+```
+
+####**Part 2.** Shortcut using `stat_summary()`; benefits: (a) no need to create a second df with summary stats, (b) only need to set overall aesthetics once in the ggplot() function
+```{r}
+##############################
+# plot
+##############################
+
+# plot raw data
+ggplot(data = na.omit(penguins), aes(x = species, y = body_mass_g, shape = sex)) +
+  geom_point(alpha = 0.1, position = position_jitterdodge(dodge.width = 0.8)) + 
+  
+  # calculate and layer on summary stats
+  stat_summary(mapping = aes(color = species),
+               fun = "mean", geom = "point", size = 4,
+               position = position_dodge(width = 0.8)) +
+  stat_summary(mapping = aes(color = species),
+               fun = "mean", geom = "errorbar", size = 1, width = 0.2,
+               fun.max = function(x) mean(x) + sd(x),
+               fun.min = function(x) mean(x) - sd(x),
+               position = position_dodge(width = 0.8)) +
+  
+  # manually adjust colors and shapes
+  scale_color_manual(values = c("darkorange", "purple", "cyan4"), guide = FALSE) + # set `guide = FALSE` to omit from legend
+  scale_shape_manual(values = c(15, 16), name = "Sex") + # set `name =` to change legend title
+  
+  # add nicer axis labels + caption
+  labs(x = "Penguin Species", 
+       y = "Body Mass (g)",
+       caption = "Data Source: Dr. Kristen Gorman, LTER Palmer Station") +
+  
+  # now fun with themes!
+  theme_classic() +
+  theme(
+        # text
+        axis.text = element_text(color = "black", size = 10), # use axis.text.x to alter just x-axis (and vice versa)
+        axis.title = element_text(color = "black", size = 14),
+        plot.caption = element_text(size = 7, hjust = 1, color = "gray", face = "italic"), 
+        # plot
+        panel.border = element_rect(colour = "black", size = 0.7, fill = NA), 
+        # legend
+        legend.position = c(0.1, 0.9), # c(right/left, top/bottom)
+        legend.box.background = element_rect(color = "black", size = 1.1))
+```
+
