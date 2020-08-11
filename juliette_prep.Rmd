@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 List of resources we might want to get together and give people
 - themes https://ggplot2.tidyverse.org/reference/ggtheme.html
 - data viz book https://serialmentor.com/dataviz/visualizing-associations.html
-- https://www.data-to-viz.com/about.html
+- https://www.data-to-viz.com/about.html=]
 
 
 Workshop:
@@ -20,15 +20,15 @@ https://github.com/allisonhorst/palmerpenguins
 
 Looking at the data and seeing what's what
 ```{r}
-#remotes::install_github("allisonhorst/palmerpenguins")
-
+# remotes::install_github("allisonhorst/palmerpenguins")
 library(palmerpenguins)
 library(ggplot2)
 library(tidyverse)
-data(package = 'palmerpenguins')
+# remotes::install_github("wilkelab/ggtext")
+library(hrbrthemes)
 ```
 
-First things first before making any types of graphs is getting to know your data. For me knowing how many NA's there are and the class of each column/variable is the most important. Not knowing these things up front can cause weird things to happen (or things not to happen) so it's always good to know before hand. It's always best to know the structure of your data well enough that you know the general lay out of your plot. This step is skipped a lot beccause there's no real product that comes out of it and it takes a little bit of time. In the end though it's so worth it!
+First things first before making any types of graphs is getting to know your data. For me knowing how many NA's there are and the class of each column/variable is the most important. Not knowing these things up front can cause weird things to happen (or things not to happen) so it's always good to know before hand. It's always best to know the structure of your data well enough that you know the general lay out of your plot. This step is skipped a lot because there's no real product that comes out of it and it takes a little bit of time. In the end though it's so worth it!
 
 Basic look into the data
 ```{r}
@@ -50,22 +50,16 @@ lapply(penguins, class)
 ## im actually not super sure when numeric versus integer comes into play for graphing... anyone?
 ```
 
-Maybe before we jump right into making graphs we can have like 5ish minutes of people suggesting graphs now that we all know more about the data. For us we could brain strom all the combos we can think of (right and wrong) and reasons for why it would work or not. This might be what we want them to do in the breakout rooms so maybe
-
-
-Ideas:
-
-- Maybe we want to do one plot showing NA values of a variable, like Allison did in her presentation for the lecturer position. I can't remember exactly how it's done but I do think it's like 1 line of code. We can show it as an option for aesetics as a reminder that sometimes graphs may lead the reader to a misleading conclusion if NA data is removed
-
-- have the end to bring it all together using facet option and people can put their graphs together
-
+Color pallette
+```{r}
+col_pal <- c("#008A82", "#57280F", "#03304A")
+```
 
 
 ```{r}
-# defintively have a code chunk where we include NA and then make the conciosu decision to not include it
 
-(penguins_plot <- ggplot(na.omit(penguins)) +
-   geom_point(aes(x = body_mass_g, y = flipper_length_mm, color = species, shape = island)) +
+ggplot(na.omit(penguins)) +
+   geom_point(aes(x = body_mass_g, y = flipper_length_mm, color = species, shape = island), size = 2) +
    theme_minimal() +
    
    ## Labeling everything
@@ -74,31 +68,52 @@ Ideas:
         title = "Exploring Palmer Station Penguins",
         subtitle = "Dimensions and Attributes",
         caption = "Data Source: Dr. Kristen Gorman LTER Palmer Station",
-        size = "Bill Length (mm)",
+        shape = "Island",
         color = "Species") +
    
    ## Editing the labels aestetics
-
    theme(plot.title = element_text(color = "black", size = 18, face = "bold", hjust = 0.5),
          plot.subtitle = element_text(color = "gray41", size = 14, face = "bold", hjust = 0.5),
          plot.caption = element_text(color = "gray65", face = "italic"),
          axis.title.x = element_text(size = 15),
          axis.title.y = element_text(size = 15)) +
    
-   # change the size of the bill length shapes
-  scale_size(breaks = c(30, 35, 40, 45, 50, 55, 60),
-             range = c(1, 8)) +
-   ## cahnge colors
-   scale_colour_manual(values = c("#008A82", "#57280F", "#03304A"), aesthetics = "colour")+
+   ## change colors
+   scale_colour_manual(values = col_pal, aesthetics = "colour")+
    facet_grid(cols = vars(sex)) 
-   
-)
+
+ggsave("plots/JV_simple.jpg", width = 10, height = 6, dpi=300) 
 ```
 
-Can also add: 
-- capitilize the male and female labels in the grid but i need to do levels(penguins$sex) <- c("Female", "Male") after doing levels(penguins$sex) to check order
-- or  get rid of those titles and put in male or female symbols, can use ggtext thoretically to use picutrees instead https://github.com/wilkelab/ggtext
-- add a mean line 
+Make the same plot but without a legend!! And with a pretty new theme. 
+```{r}
+
+ggplot(na.omit(penguins)) +
+   geom_point(aes(x = body_mass_g, y = flipper_length_mm, color = species)) +
+   theme_ipsum_rc() +
+   
+   ## Labeling everything
+   labs(x = "Body Mass (g)",
+        y = "Flipper Length (mm)",
+        ## use markdown style to code the colors into the title
+        title = "Dimensions for <b style='color:#008A82'>adelie,</b> <b style='color:#57280F'>chinstrap,</b> and <b style='color:#03304A'>gentoos</b> penguins",
+        caption = "Data Source: Dr. Kristen Gorman LTER Palmer Station") +
+   
+   ## Editing the labels aesthetics
+      theme(plot.title = element_markdown(hjust = 0.3),
+            plot.caption = element_text(color = "gray65", face = "italic", size = 8),
+            legend.position = "none") +
+
+   ## change colors
+   scale_colour_manual(values = col_pal)+
+   facet_grid(cols = vars(sex)) 
+
+ggsave("plots/JV_prettier.jpg", width = 10, height = 6, dpi=300) 
+```
+
+
+
+
 
 
 ## Bar plot:
@@ -160,44 +175,7 @@ summary(penguins$bill_length_mm)
 #############
 
 
-```{r}
-library(tidyverse)
-library(hrbrthemes)
-# remotes::install_github("wilkelab/ggtext")
-# library(ggtext)
 
-# color <- c("#008A82", "#57280F", "#03304A")
-
-(penguins_plot <- ggplot(na.omit(penguins)) +
-   geom_point(aes(x = body_mass_g, y = flipper_length_mm, color = species)) +
-   theme_ipsum_rc() +
-   
-   ## Labeling everything
-   labs(x = "Body Mass (g)",
-        y = "Flipper Length (mm)",
-        title = "Dimensions for <b style='color:#008A82'>adelie,</b> <b style='color:#57280F'>chinstrap,</b> and <b style='color:#03304A'>gentoos</b> penguins",
-        caption = "Data Source: Dr. Kristen Gorman LTER Palmer Station",
-        size = "Bill Length (mm)",
-        color = "Species") +
-   
-   ## Editing the labels aestetics
-      theme(plot.title = element_markdown(hjust = .3),
-           # plot.subtitle = element_text(color = "gray41", size = 16, face = "bold", hjust = 0.5),
-            plot.caption = element_text(color = "gray65", face = "italic", size = 8),
-           # axis.title.y = element_text(size = 15),
-            legend.position = "none") +
-
-  #  # change the size of the bill length shapes
-  # scale_size(breaks = c(30, 35, 40, 45, 50, 55, 60),
-  #            range = c(1, 8)) +
-   ## cahnge colors
-   scale_colour_manual(values = c("#008A82", "#57280F", "#03304A"), aesthetics = "colour")+
-   facet_grid(cols = vars(sex)) 
-)
-   
-
-
-```
 
 
 
