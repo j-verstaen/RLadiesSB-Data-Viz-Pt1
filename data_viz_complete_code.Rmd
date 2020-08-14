@@ -1,0 +1,183 @@
+---
+title: "R-Ladies Santa Barbara - Data Viz (Part 1!) - complete code handout"
+author: "An Bui, Sam Csik, Juliette Verstaen"
+date: "19 August 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###**Summary**
+
+###**Outline**
+
+**Part 0.** Load packages
+**Part 1.** Juliette - TITLE HERE
+**Part 2.** An - TITLE HERE
+**Part 3.** Sam - Plotting summary stats using `stat_summary()`
+
+####**Part 0.** Load packages
+```{r}
+library(palmerpenguins) 
+library(tidyverse)
+library(ggtext) 
+library(hrbrthemes)
+library(pathwork)
+```
+
+#####################################################
+####**Part 1.** Juliette
+#####################################################
+
+#####################################################
+####**Part 2.** An
+#####################################################
+
+#####################################################
+####**Part 3.** Sam
+#####################################################
+
+Here, we'll walk through plotting a combination of raw data and summary stats together on the same figure. There are two general approaches:
+
+(1) calculate summary stats and save to a new data frame; plot raw data from original data frame and layer on summary stats from the new data frame -- this tends to require **more** code
+
+(2) use the `stat_summary()` function within ggplot to simultaneously calculate and plot summary stats 
+
+We'll recreate the same figure using both approaches.
+
+*Apporach 1* Longer way: Summarize data for plotting, then construct figure 
+```{r}
+##############################
+# summarize body mass data (mean, max, min)
+##############################
+
+bm_summary <- penguins %>% 
+  drop_na() %>%
+  group_by(species, sex) %>% 
+  summarize(
+    mean = mean(body_mass_g),
+    sd = sd(body_mass_g)
+  )
+
+##############################
+# plot
+##############################
+
+ggplot() +
+  
+  # plot raw data
+  geom_point(data = na.omit(penguins), aes(x = species, y = body_mass_g, shape = sex), 
+             alpha = 0.2, 
+             position = position_jitterdodge(dodge.width = 0.8)) +
+  
+  # layer on summary stats
+  geom_errorbar(data = bm_summary, aes(x = species, ymin = mean - sd, ymax = mean + sd, color = species, group = sex), 
+                width = 0.1, size = 1,
+                position = position_dodge(width = 0.8)) +
+  geom_point(data = bm_summary, aes(x = species, y = mean, shape = sex, color = species),
+             size = 4,
+             position = position_dodge(width = 0.8)) +
+  
+  # manually adjust colors and shapes (gotta reflect what's up )
+  scale_color_manual(values = c("darkorange", "purple", "cyan4"), guide = FALSE) + # set `guide = FALSE` to omit from legend
+  scale_shape_manual(values = c(15, 16), name = "Sex") + # set `name =` to change legend title
+  
+  # add nicer axis labels + caption
+  labs(x = "Penguin Species", 
+       y = "Body Mass (g)",
+       title = "Body weights of female vs. male <b style='color:darkorange'>adelie,</b> <b style='color:purple'>chinstrap,</b> and <b style='color:cyan4'>gentoo</b> penguins",
+       subtitle = "Colored points represent mean body mass (± SD)",
+       caption = "Data Source: Dr. Kristen Gorman, LTER Palmer Station") +
+  
+  # now fun with themes!
+  theme_ipsum(grid = FALSE) +
+  theme(
+        # text
+        plot.title = element_markdown(hjust = 0, size = 13),
+        # axis.text = element_text(color = "black", size = 10), 
+        # axis.title = element_text(size = 14), 
+        plot.caption = element_text(size = 7, hjust = 1, color = "gray", face = "italic"),
+        # plot
+        panel.border = element_rect(colour = "black", size = 0.7, fill = NA), 
+        # legend
+        legend.position = c(0.12, 0.85), # (right/left, top/bottom)
+        legend.box.background = element_rect(color = "black")
+        ) 
+```
+
+*Approach 2* Shortcut using `stat_summary()`; benefits: (a) no need to create a second df with summary stats, (b) only need to set overall aesthetics once in the ggplot() function
+```{r}
+##############################
+# plot
+##############################
+
+# plot raw data
+ggplot(data = na.omit(penguins), aes(x = species, y = ___, shape = ___)) + # choose a different variable, or stick with body_mass_g :)
+  geom_point(alpha = ___, position = position_jitterdodge(dodge.width = ___)) + 
+  
+  # calculate and layer on summary stats (mean +/- sd)
+  stat_summary(mapping = aes(color = ___),
+               fun = "mean", geom = "___", size = ___,
+               position = position_dodge(width = ___)) +
+  stat_summary(mapping = aes(color = species),
+               fun = "mean", geom = "errorbar", size = 1, width = 0.2,
+               fun.max = ___,
+               fun.min = ___,
+               position = position_dodge(width = ___)) +
+  
+  # manually adjust colors and shapes
+  scale_color_manual(values = c("___", "___", "___"), guide = FALSE) + # set `guide = FALSE` to omit from legend
+  scale_shape_manual(values = c(___, ___), name = "Sex") + # set `name =` to change legend title
+  
+  # add nicer axis labels + title + caption
+  labs(x = "Penguin Species", 
+       y = "___",
+       title = "Body weights of female vs. male adelie, chinstrap, and gentoo penguins",
+       subtitle = "Colored points represent mean body mass (± SD)",
+       caption = "Data Source: Dr. Kristen Gorman, LTER Palmer Station") +
+  
+  ########################
+  # theme option 1 (basic ggplot)
+  ########################
+  theme___*__() + # try out different built-in themes e.g theme_minimal(), theme_bw(), etc
+  theme(
+        # text
+        plot.title = element_text(hjust = ___, size = ___),
+        axis.text = element_text(color = "___", size = ___),
+        axis.title = element_text(color = "___", size = ___),
+        plot.caption = element_text(size = ___, hjust = ___, color = "___", face = "___"),
+
+        # plot
+        panel.border = element_rect(color = "___", size = ___, fill = NA),
+
+        # legend
+        legend.position = c(___, ___), # c(right/left, top/bottom)
+        legend.box.background = element_rect(color = "___"))
+
+  ########################
+  # theme option 2 (a little bit fancier)
+  ########################
+  # theme_ipsum(grid = ___) + # from hrbrthemes package
+  # theme(
+  #       # text
+  #       plot.title = element_markdown(hjust = ___ size = ___),
+  #       plot.caption = element_text(size = ___, hjust = ___, color = "___", face = "___"),
+  # 
+  #       # plot
+  #       panel.border = element_rect(colour = "___", size = ___, fill = NA),
+  # 
+  #       # legend
+  #       legend.position = c(0___, ___), # c(right/left, top/bottom)
+  #       legend.box.background = element_rect(color = "___"))
+
+# title for use with ggtext() : "Body weights of female vs. male <b style='color:___'>adelie,</b> <b style='color:___'>chinstrap,</b> and <b style='color:___'>gentoo</b> penguins"
+
+########################
+# Optional: save your plot as a .jpg, .pdf, etc. using ggsave()
+########################
+
+# ggsave(plot = SC_simple, here::here("plots", "SC_simple.jpg"), width = 7, height = 7)
+```
+
