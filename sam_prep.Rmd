@@ -17,25 +17,26 @@ Here, we'll walk through plotting a combination of raw data and summary stats to
 
 (2) use the `stat_summary()` function within ggplot to simultaneously calculate and plot summary stats 
 
-We'll recrete the same figure using both approaches.
+We'll recreate the same figure using both approaches.
 
 ####**Part 0.** Import libraries (it's okay if you don't have the naniar and ggtext packages right now)
 ```{r}
 library(palmerpenguins) 
 library(tidyverse)
-library(naniar) 
 library(ggtext) 
 library(hrbrthemes)
 ```
 
 ####**Part 1.** Longer way: Summarize data for plotting, then construct figure
+
+*NOTE: Normally, you should take a critical look at your data, determine why NAs exist and if they might bias your results...we're skipping that part here and just omitting any NAs for the sake of time. But for when you do, check out the `naniar` package*
 ```{r}
 ##############################
 # summarize body mass data (mean, max, min)
 ##############################
 
 bm_summary <- penguins %>% 
-  drop_na() %>% # from naniar package
+  drop_na() %>%
   group_by(species, sex) %>% 
   summarize(
     mean = mean(body_mass_g),
@@ -69,7 +70,7 @@ ggplot() +
   labs(x = "Penguin Species", 
        y = "Body Mass (g)",
        title = "Body weights of female vs. male <b style='color:darkorange'>adelie,</b> <b style='color:purple'>chinstrap,</b> and <b style='color:cyan4'>gentoo</b> penguins",
-       subtitle = "Mean (± SD)",
+       subtitle = "Colored points represent mean body mass (± SD)",
        caption = "Data Source: Dr. Kristen Gorman, LTER Palmer Station") +
   
   # now fun with themes!
@@ -115,44 +116,51 @@ ggplot(data = na.omit(penguins), aes(x = species, y = body_mass_g, shape = sex))
   # add nicer axis labels + title + caption
   labs(x = "Penguin Species", 
        y = "Body Mass (g)",
-       title = "Body weights of female vs. male penguins",
-       subtitle = "Mean (± SD)",
+       # shape = "Sex",
+       title = "Body weights of female vs. male <b style='color:darkorange'>adelie,</b> <b style='color:purple'>chinstrap,</b> and <b style='color:cyan4'>gentoo</b> penguins",
+       subtitle = "Colored points represent mean body mass (± SD)",
        caption = "Data Source: Dr. Kristen Gorman, LTER Palmer Station") +
   
   ########################
   # theme option 1 (basic ggplot)
   ########################
-  theme_classic() + # built-in theme
+  # theme_classic() + # built-in theme
+  # theme(
+  #       # text
+  #       plot.title = element_text(hjust = 0, size = 14),
+  #       axis.text = element_text(color = "black", size = 10),
+  #       axis.title = element_text(color = "black", size = 14),
+  #       plot.caption = element_text(size = 7, hjust = 1, color = "gray", face = "italic"),
+  # 
+  #       # plot
+  #       panel.border = element_rect(color = "black", size = 0.7, fill = NA),
+  # 
+  #       # legend
+  #       legend.position = c(0.12, 0.85), # c(right/left, top/bottom)
+  #       legend.box.background = element_rect(color = "black"))
+
+  ########################
+  # theme option 2 (a little bit fancier)
+  ########################
+  theme_ipsum(grid = FALSE) + # from hrbrthemes package
   theme(
         # text
-        plot.title = element_text(hjust = 0, size = 18),
-        axis.text = element_text(color = "black", size = 10),
-        axis.title = element_text(color = "black", size = 14),
+        plot.title = element_markdown(hjust = 0, size = 13),
         plot.caption = element_text(size = 7, hjust = 1, color = "gray", face = "italic"),
 
         # plot
-        panel.border = element_rect(color = "black", size = 0.7, fill = NA),
+        panel.border = element_rect(colour = "black", size = 0.7, fill = NA),
 
         # legend
         legend.position = c(0.12, 0.85), # c(right/left, top/bottom)
         legend.box.background = element_rect(color = "black"))
 
-  ########################
-  # theme option 2 (a little bit fancier)
-  ########################
-  # theme_ipsum(grid = FALSE) + # from hrbrthemes package
-  # theme(
-  #       # text
-  #       plot.title = element_markdown(hjust = 0, size = 13),
-  #       plot.caption = element_text(size = 7, hjust = 1, color = "gray", face = "italic"), 
-  #       
-  #       # plot
-  #       panel.border = element_rect(colour = "black", size = 0.7, fill = NA), 
-  #       
-  #       # legend
-  #       legend.position = c(0.12, 0.85), # c(right/left, top/bottom)
-  #       legend.box.background = element_rect(color = "black"))
-  
 # title for use with ggtext() : "Body weights of female vs. male <b style='color:darkorange'>adelie,</b> <b style='color:purple'>chinstrap,</b> and <b style='color:cyan4'>gentoo</b> penguins"
+
+########################
+# Optional: save your plot as a .jpg, .pdf, etc. using ggsave()
+########################
+
+# ggsave(plot = SC_simple, here::here("plots", "SC_simple.jpg"), width = 7, height = 7)
 ```
 

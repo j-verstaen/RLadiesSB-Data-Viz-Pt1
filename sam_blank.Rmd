@@ -21,19 +21,20 @@ We'll recrete the same figure using both approaches.
 ```{r}
 library(palmerpenguins) 
 library(tidyverse)
-library(naniar)
 library(ggtext)
 library(hrbrthemes)
 ```
 
 ####**Part 1.** Longer way: Summarize data for plotting, then construct figure
+
+*NOTE: Normally, you should take a critical look at your data, determine why NAs exist and if they might bias your results...we're skipping that part here and just omitting any NAs for the sake of time. But for when you do, check out the `naniar` package*
 ```{r}
 ##############################
 # summarize body mass data (mean, max, min)
 ##############################
 
 bm_summary <- penguins %>% 
-  drop_na() %>% # from naniar package
+  drop_na() %>% 
   group_by(species, sex) %>% 
   summarize(
     mean = mean(body_mass_g),
@@ -93,15 +94,15 @@ ggplot() +
 ##############################
 
 # plot raw data
-ggplot(data = na.omit(penguins), aes(x = species, y = ___, shape = sex)) +
+ggplot(data = na.omit(penguins), aes(x = species, y = ___, shape = ___)) +
   geom_point(alpha = ___, position = position_jitterdodge(dodge.width = ___)) + 
   
   # calculate and layer on summary stats (mean +/- sd)
-  stat_summary(mapping = aes(color = species),
-               fun = "mean", geom = "point", size = ___,
+  stat_summary(mapping = aes(color = ___),
+               fun = "___", geom = "___", size = ___,
                position = position_dodge(width = ___)) +
   stat_summary(mapping = aes(color = species),
-               fun = "mean", geom = "errorbar", size = ___, width = ___,
+               fun = "___", geom = "___", size = ___, width = ___,
                fun.max = function(x) mean(x) + sd(x),
                fun.min = function(x) mean(x) - sd(x),
                position = position_dodge(width = ___)) +
