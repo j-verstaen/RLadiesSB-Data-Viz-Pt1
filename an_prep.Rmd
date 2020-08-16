@@ -19,42 +19,59 @@ library(rlang)
 data("penguins")
 ```
 
-I think I'm going to do counts across years?
+We'll start with a standard plot, with counts as a function of years.
+
+```{r}
+# calculating counts per year per penguin species
+penguin_counts <- penguins %>% 
+  group_by(year, species) %>% 
+  summarize(counts = length(species))
+# look at the structure of this data frame!
+
+# note that year has to be as.numeric
+ggplot(penguin_counts, aes(x = as.numeric(year), y = counts)) +
+  # geom point is the dots
+  geom_point(aes(color = species), size = 5) +
+  # geom_line is the lines between dots
+  geom_line(aes(color = species), size = 1, alpha = 0.8) +
+  
+  # changing the scale of the x-axis
+  scale_x_continuous(breaks = c(2007, 2008, 2009)) +
+  
+  # putting in colors
+  scale_color_manual(values = c("darkorange", "purple", "cyan4")) + 
+  
+  # informative labels
+  labs(x = "Year", 
+       y = "Counts",
+       title = "Counts per year of Adelie, Chinstrap, and Gentoo penguins",
+       caption = "Data Source: Dr. Kristen Gorman, LTER Palmer Station",
+       color = "Species") +
+  
+  # a clean theme
+  theme_ipsum(grid = FALSE)
+```
+
+Now, we're going to make a plot I just learned about called a "lollipop plot." This is a similar plot to a column/bar graph, but it's especially useful when you have many columns/bars. I'm going to make them here, because I think they're fun. However, you can look at some real examples of actually useful visualizations at the [R Graph Gallery](https://www.r-graph-gallery.com/lollipop-plot.html).
 
 ```{r}
 penguin_counts_island <- penguins %>% 
-  group_by(year, species) %>% 
-  summarize(counts = length(species))
-
-ggplot(penguin_counts_island, aes(x = as.factor(year), y = counts)) +
-  geom_point(aes(color = species)) +
-  geom_line(aes(color = species))
-```
-
-
-```{r}
-penguin_counts <- penguins %>% 
   group_by(year, island, species) %>% 
   summarize(counts = length(year)) %>% 
   mutate(penguin_image = case_when(
     species == "Chinstrap" ~ "chinstrap.png",
     species == "Gentoo" ~ "gentoo.png",
     species == "Adelie" ~ "adelie.png"
-  )) %>% 
-  mutate(penguin_color = case_when(
-    species == "Chinstrap" ~ "purple",
-    species == "Gentoo" ~ "cyan4",
-    species == "Adelie" ~ "darkorange"
-  ))
+  )) 
 
 island_spp <- function(which_island, which_species, which_color) {
-  ggplot(penguin_counts %>% filter(island == {{ which_island }} & species == {{ which_species }}), aes(x = as.factor(year), y = counts)) +
+  ggplot(penguin_counts_island %>% filter(island == {{ which_island }} & species == {{ which_species }}), aes(x = as.factor(year), y = counts)) +
     geom_segment(aes(x = as.factor(year), xend = as.factor(year), y = 0, yend = counts), color = {{ which_color }}, size = 2) +
     geom_image(aes(image = penguin_image), size = 0.1) +
     labs(title = paste(which_island, which_species, sep = " - "),
          x = "Year",
          y = "Counts") +
-    theme_bw()
+    theme_classic()
 }
   
 biscoe_adelie <- island_spp("Biscoe", "Adelie", "darkorange") +
