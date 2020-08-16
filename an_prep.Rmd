@@ -13,6 +13,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(palmerpenguins)
 library(patchwork)
+library(ggimage)
+library(rlang)
 
 data("penguins")
 ```
@@ -20,41 +22,64 @@ data("penguins")
 I think I'm going to do counts across years?
 
 ```{r}
-penguin_counts <- penguins %>% 
-  group_by(year, island, species) %>% 
-  summarize(counts = length(year))
-  
-biscoe <- ggplot(penguin_counts %>% filter(island == "Biscoe"), aes(x = as.factor(year), y = counts)) +
-  geom_segment(aes(x = as.factor(year), xend = as.factor(year), y = 0, yend = counts)) +
-  geom_point(aes(color = species), size = 2) +
-  facet_wrap(~species)
-biscoe
-
-torgersen <- ggplot(penguin_counts %>% filter(island == "Torgersen"), aes(x = as.factor(year), y = counts)) +
-  geom_segment(aes(x = as.factor(year), xend = as.factor(year), y = 0, yend = counts)) +
-  geom_point(aes(color = species), size = 2)
-torgersen
-
-dream <- ggplot(penguin_counts %>% filter(island == "Dream"), aes(x = as.factor(year), y = counts)) +
-  geom_segment(aes(x = as.factor(year), xend = as.factor(year), y = 0, yend = counts)) +
-  geom_point(aes(color = species), size = 2) +
-  facet_wrap(~species)
-dream
-
-grid <- biscoe / 
-  (torgersen + plot_spacer()) / 
-  dream + 
-  plot_layout(heights = c(1, 2, 1))
-grid
-```
-
-```{r}
 penguin_counts_island <- penguins %>% 
   group_by(year, species) %>% 
   summarize(counts = length(species))
 
-ggplot(penguin_counts_island, aes(x = as.numeric(year), y = counts)) +
+ggplot(penguin_counts_island, aes(x = as.factor(year), y = counts)) +
   geom_point(aes(color = species)) +
   geom_line(aes(color = species))
 ```
+
+
+```{r}
+penguin_counts <- penguins %>% 
+  group_by(year, island, species) %>% 
+  summarize(counts = length(year)) %>% 
+  mutate(penguin_image = case_when(
+    species == "Chinstrap" ~ "chinstrap.png",
+    species == "Gentoo" ~ "gentoo.png",
+    species == "Adelie" ~ "adelie.png"
+  )) %>% 
+  mutate(penguin_color = case_when(
+    species == "Chinstrap" ~ "purple",
+    species == "Gentoo" ~ "cyan4",
+    species == "Adelie" ~ "darkorange"
+  ))
+
+island_spp <- function(which_island, which_species, which_color) {
+  ggplot(penguin_counts %>% filter(island == {{ which_island }} & species == {{ which_species }}), aes(x = as.factor(year), y = counts)) +
+    geom_segment(aes(x = as.factor(year), xend = as.factor(year), y = 0, yend = counts), color = {{ which_color }}, size = 2) +
+    geom_image(aes(image = penguin_image), size = 0.1) +
+    labs(title = paste(which_island, which_species, sep = " - "),
+         x = "Year",
+         y = "Counts") +
+    theme_bw()
+}
+  
+biscoe_adelie <- island_spp("Biscoe", "Adelie", "darkorange") +
+  scale_y_continuous(limits = c(0, 20))
+biscoe_adelie
+
+biscoe_gentoo <- island_spp("Biscoe", "Gentoo", "cyan4")
+biscoe_gentoo
+
+torgersen_adelie <- island_spp("Torgersen", "Adelie", "darkorange") +
+  scale_y_continuous(limits = c(0, 22))
+torgersen_adelie 
+
+dream_adelie <- island_spp("Dream", "Adelie", "darkorange") +
+  scale_y_continuous(limits = c(0, 22))
+dream_adelie
+
+dream_chinstrap <- island_spp("Dream", "Chinstrap", "purple") +
+  scale_y_continuous(limits = c(0, 29))
+dream_chinstrap
+
+grid <- (biscoe_adelie + biscoe_gentoo) /
+        (dream_adelie + dream_chinstrap) /
+        (torgersen_adelie + plot_spacer())
+grid
+```
+
 
