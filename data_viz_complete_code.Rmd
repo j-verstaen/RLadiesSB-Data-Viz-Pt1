@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 **Part 0.** Load packages
 **Part 1.** Juliette - TITLE HERE
-**Part 2.** An - ~~Whimsical~~ plots and grids
+**Part 2.** An - Putting your ggplot() into a function, grids
 **Part 3.** Sam - Plotting summary stats using `stat_summary()`
 
 ####**Part 0.** Load packages
@@ -139,7 +139,10 @@ dream_chinstrap
 # now put everything together with patchwork!
 grid <- (biscoe_adelie + biscoe_gentoo) /
         (dream_adelie + dream_chinstrap) /
-        (torgersen_adelie + plot_spacer())
+        (torgersen_adelie + plot_spacer()) +
+  # add plot labels
+  plot_annotation(tag_levels = "a", tag_suffix = ")")
+
 grid
 ```
 
