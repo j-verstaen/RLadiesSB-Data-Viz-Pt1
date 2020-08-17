@@ -3,6 +3,8 @@ title: "R-Ladies Santa Barbara - Data Viz (Part 1!) - complete code handout"
 author: "An Bui, Sam Csik, Juliette Verstaen"
 date: "19 August 2020"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -24,7 +26,7 @@ library(palmerpenguins)
 library(tidyverse)
 library(ggtext) 
 library(hrbrthemes)
-library(pathwork)
+library(patchwork)
 ```
 
 #####################################################
@@ -114,26 +116,26 @@ ggplot() +
 ##############################
 
 # plot raw data
-ggplot(data = na.omit(penguins), aes(x = species, y = ___, shape = ___)) + # choose a different variable, or stick with body_mass_g :)
-  geom_point(alpha = ___, position = position_jitterdodge(dodge.width = ___)) + 
+ggplot(data = na.omit(penguins), aes(x = species, y = body_mass_g, shape = sex)) +
+  geom_point(alpha = 0.2, position = position_jitterdodge(dodge.width = 0.8)) + 
   
   # calculate and layer on summary stats (mean +/- sd)
-  stat_summary(mapping = aes(color = ___),
-               fun = "mean", geom = "___", size = ___,
-               position = position_dodge(width = ___)) +
+  stat_summary(mapping = aes(color = species),
+               fun = "mean", geom = "point", size = 4,
+               position = position_dodge(width = 0.8)) +
   stat_summary(mapping = aes(color = species),
                fun = "mean", geom = "errorbar", size = 1, width = 0.2,
-               fun.max = ___,
-               fun.min = ___,
-               position = position_dodge(width = ___)) +
+               fun.max = function(x) mean(x) + sd(x),
+               fun.min = function(x) mean(x) - sd(x),
+               position = position_dodge(width = 0.8)) +
   
   # manually adjust colors and shapes
-  scale_color_manual(values = c("___", "___", "___"), guide = FALSE) + # set `guide = FALSE` to omit from legend
-  scale_shape_manual(values = c(___, ___), name = "Sex") + # set `name =` to change legend title
+  scale_color_manual(values = c("darkorange", "purple", "cyan4"), guide = FALSE) + # set `guide = FALSE` to omit from legend
+  scale_shape_manual(values = c(15, 16), name = "Sex") + # set `name =` to change legend title
   
   # add nicer axis labels + title + caption
   labs(x = "Penguin Species", 
-       y = "___",
+       y = "Body Mass (g)",
        title = "Body weights of female vs. male adelie, chinstrap, and gentoo penguins",
        subtitle = "Colored points represent mean body mass (± SD)",
        caption = "Data Source: Dr. Kristen Gorman, LTER Palmer Station") +
@@ -141,38 +143,38 @@ ggplot(data = na.omit(penguins), aes(x = species, y = ___, shape = ___)) + # cho
   ########################
   # theme option 1 (basic ggplot)
   ########################
-  theme___*__() + # try out different built-in themes e.g theme_minimal(), theme_bw(), etc
+  theme_classic() + # built-in theme
   theme(
         # text
-        plot.title = element_text(hjust = ___, size = ___),
-        axis.text = element_text(color = "___", size = ___),
-        axis.title = element_text(color = "___", size = ___),
-        plot.caption = element_text(size = ___, hjust = ___, color = "___", face = "___"),
+        plot.title = element_text(hjust = 0, size = 14),
+        axis.text = element_text(color = "black", size = 10),
+        axis.title = element_text(color = "black", size = 14),
+        plot.caption = element_text(size = 7, hjust = 1, color = "gray", face = "italic"),
 
         # plot
-        panel.border = element_rect(color = "___", size = ___, fill = NA),
+        panel.border = element_rect(color = "black", size = 0.7, fill = NA),
 
         # legend
-        legend.position = c(___, ___), # c(right/left, top/bottom)
-        legend.box.background = element_rect(color = "___"))
+        legend.position = c(0.12, 0.85), # c(right/left, top/bottom)
+        legend.box.background = element_rect(color = "black"))
 
   ########################
   # theme option 2 (a little bit fancier)
   ########################
-  # theme_ipsum(grid = ___) + # from hrbrthemes package
+  # theme_ipsum(grid = FALSE) + # from hrbrthemes package
   # theme(
   #       # text
-  #       plot.title = element_markdown(hjust = ___ size = ___),
-  #       plot.caption = element_text(size = ___, hjust = ___, color = "___", face = "___"),
+  #       plot.title = element_markdown(hjust = 0, size = 13),
+  #       plot.caption = element_text(size = 7, hjust = 1, color = "gray", face = "italic"),
   # 
   #       # plot
-  #       panel.border = element_rect(colour = "___", size = ___, fill = NA),
+  #       panel.border = element_rect(colour = "black", size = 0.7, fill = NA),
   # 
   #       # legend
-  #       legend.position = c(0___, ___), # c(right/left, top/bottom)
-  #       legend.box.background = element_rect(color = "___"))
+  #       legend.position = c(0.12, 0.85), # c(right/left, top/bottom)
+  #       legend.box.background = element_rect(color = "black"))
 
-# title for use with ggtext() : "Body weights of female vs. male <b style='color:___'>adelie,</b> <b style='color:___'>chinstrap,</b> and <b style='color:___'>gentoo</b> penguins"
+# title for use with ggtext() : "Body weights of female vs. male <b style='color:darkorange'>adelie,</b> <b style='color:purple'>chinstrap,</b> and <b style='color:cyan4'>gentoo</b> penguins"
 
 ########################
 # Optional: save your plot as a .jpg, .pdf, etc. using ggsave()
