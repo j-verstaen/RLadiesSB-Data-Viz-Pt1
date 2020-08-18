@@ -24,7 +24,7 @@ library(palmerpenguins)
 library(tidyverse)
 library(ggtext) 
 library(hrbrthemes)
-library(pathwork)
+library(patchwork)
 ```
 
 #####################################################
