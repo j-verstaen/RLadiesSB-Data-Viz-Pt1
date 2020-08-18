@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 **Part 0.** Load packages
 **Part 1.** Juliette - TITLE HERE
-**Part 2.** An - TITLE HERE
+**Part 2.** An - Putting your ggplot() into a function, grids
 **Part 3.** Sam - Plotting summary stats using `stat_summary()`
 
 ####**Part 0.** Load packages
@@ -27,6 +27,8 @@ library(tidyverse)
 library(ggtext) 
 library(hrbrthemes)
 library(patchwork)
+library(ggimage)
+library(rlang)
 ```
 
 #####################################################
@@ -36,6 +38,115 @@ library(patchwork)
 #####################################################
 ####**Part 2.** An
 #####################################################
+
+We'll start with a standard plot, with counts as a function of years.
+
+```{r}
+# calculating counts per year per penguin species
+penguin_counts <- penguins %>% 
+  group_by(year, species) %>% 
+  summarize(counts = length(species))
+# look at the structure of this data frame!
+
+# note that year has to be as.numeric
+ggplot(penguin_counts, aes(x = as.numeric(year), y = counts)) +
+  # geom point is the dots
+  geom_point(aes(color = species), size = 5) +
+  # geom_line is the lines between dots
+  geom_line(aes(color = species), size = 1, alpha = 0.8) +
+  
+  # changing the scale of the x-axis
+  scale_x_continuous(breaks = c(2007, 2008, 2009)) +
+  
+  # putting in colors
+  scale_color_manual(values = c("darkorange", "purple", "cyan4")) + 
+  
+  # informative labels
+  labs(x = "Year", 
+       y = "Counts",
+       title = "Counts per year of Adelie, Chinstrap, and Gentoo penguins",
+       caption = "Data Source: Dr. Kristen Gorman, LTER Palmer Station",
+       color = "Species") +
+  
+  # a clean theme
+  theme_ipsum()
+```
+
+Now, we're going to make a plot I just learned about called a "lollipop plot." This is a similar plot to a column/bar graph, but it's especially useful when you have many columns/bars. I'm going to make them here, because I think they're fun. However, you can look at some real examples of actually useful visualizations at the [R Graph Gallery](https://www.r-graph-gallery.com/lollipop-plot.html).
+
+There are two packages that you can use here: the first is [ggimage](https://github.com/GuangchuangYu/ggimage), which allows you to insert images into your ggplots. The second is [patchwork](https://github.com/thomasp85/patchwork), which allows you to arrange plots in the layouts of your choosing.
+
+First, we'll get a data frame together.
+```{r}
+penguin_counts_island <- penguins %>% 
+  group_by(year, island, species) %>% 
+  summarize(counts = length(year)) %>% 
+  # adding a column of image file names for later
+  mutate(penguin_image = case_when(
+    species == "Chinstrap" ~ "chinstrap.png",
+    species == "Gentoo" ~ "gentoo.png",
+    species == "Adelie" ~ "adelie.png"
+  )) 
+```
+
+Then, we're going to make a function to plot. I do this a lot when I'm exploring my data and I'm making a lot of plots that basically have the same layout but with some minor differences. 
+
+```{r}
+# the function takes 3 arguments: island, species, and color
+island_spp <- function(which_island, which_species, which_color) {
+  # same idea as a normal ggplot function, except now you're making your own!
+  # step 1. filter the data frame to only include the island and species of interest
+  ggplot(penguin_counts_island %>% filter(island == {{ which_island }} & species == {{ which_species }}), 
+         # set the x and y axes
+         aes(x = as.factor(year), y = counts)) +
+    
+    # the segment is the "stick" of the lollipop - note the start and end
+    geom_segment(aes(x = as.factor(year), xend = as.factor(year), y = 0, yend = counts), color = {{ which_color }}, size = 2) +
+    
+    # the image is the candy part!
+    geom_image(aes(image = penguin_image), size = 0.1) +
+    
+    # labels
+    labs(title = paste(which_island, which_species, sep = " - "),
+         x = "Year",
+         y = "Counts") +
+    
+    # theme
+    theme_classic()
+}
+```
+
+Now, we're ready to plot!
+
+```{r}
+biscoe_adelie <- island_spp("Biscoe", "Adelie", "darkorange") +
+  scale_y_continuous(limits = c(0, 20))
+biscoe_adelie
+
+biscoe_gentoo <- island_spp("Biscoe", "Gentoo", "cyan4")
+biscoe_gentoo
+
+torgersen_adelie <- island_spp("Torgersen", "Adelie", "darkorange") +
+  scale_y_continuous(limits = c(0, 22))
+torgersen_adelie 
+
+dream_adelie <- island_spp("Dream", "Adelie", "darkorange") +
+  scale_y_continuous(limits = c(0, 22))
+dream_adelie
+
+dream_chinstrap <- island_spp("Dream", "Chinstrap", "purple") +
+  scale_y_continuous(limits = c(0, 29))
+dream_chinstrap
+
+# now put everything together with patchwork!
+grid <- (biscoe_adelie + biscoe_gentoo) /
+        (dream_adelie + dream_chinstrap) /
+        (torgersen_adelie + plot_spacer()) +
+  # add plot labels
+  plot_annotation(tag_levels = "a", tag_suffix = ")")
+
+grid
+```
 
 #####################################################
 ####**Part 3.** Sam
