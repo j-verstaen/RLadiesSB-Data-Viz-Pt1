@@ -13,14 +13,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ###**Summary**
 
+We'll be walking through the components necessary for constructing a basic ggplot, and also delve into some cool features for elevating the aesthetics of your plots.
+
+*NOTE: Normally, you should take a critical look at your data, determine why NAs exist and if they might bias your results...we're skipping that part here and just omitting any NAs for the sake of time. But for when you do explore NAs, we suggest checking out the `naniar` package*
+
 ###**Outline**
 
 **Part 0.** Load packages
 **Part 1.** Juliette - Basic ggplot(), putting the legend in the title, and themes
 **Part 2.** An - Putting your ggplot() into a function, grids
 **Part 3.** Sam - Plotting summary stats using `stat_summary()`
-
-*NOTE: Normally, you should take a critical look at your data, determine why NAs exist and if they might bias your results...we're skipping that part here and just omitting any NAs for the sake of time. But for when you do explore NAs, we suggest checking out the `naniar` package*
 
 ####**Part 0.** Load packages
 ```{r}
