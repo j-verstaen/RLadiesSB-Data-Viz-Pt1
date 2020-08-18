@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ###**Outline**
 
 **Part 0.** Load packages
-**Part 1.** Juliette - TITLE HERE
+**Part 1.** Juliette - Basic ggplot(), putting the legend in the title, and themes
 **Part 2.** An - Putting your ggplot() into a function, grids
 **Part 3.** Sam - Plotting summary stats using `stat_summary()`
 
@@ -36,6 +36,91 @@ library(rlang)
 #####################################################
 ####**Part 1.** Juliette
 #####################################################
+
+We're going to create a standard scatter ggplot and show the 3 main things I do every time I create a plot:
+1. Choose the type of plot you want and the aesthetics needed to make it happen
+2. Labels
+3. Make it look pretty! - for me this means: what the plot theme is, messing with things in the theme(), and playing with colors
+
+I always do this part last because I spend forever on it, and I want to get the meat of the plot right first
+
+Then I’m going to show you how to represent your legend (if colors) in the title and some plot themes from the package ‘hrbrthemes’
+
+
+```{r create scatter}
+
+ggplot(na.omit(penguins)) +
+   
+   ## 1. Choose your plot and aesthetics
+   geom_point(aes(x = body_mass_g, y = flipper_length_mm, color = species, shape = island), size = 2) +
+   
+   ## 2. Label all the things
+   labs(x = "Body Mass (g)",
+        y = "Flipper Length (mm)",
+        title = "Exploring Palmer Station Penguins",
+        subtitle = "Dimensions and Attributes",
+        caption = "Data Source: Dr. Kristen Gorman LTER Palmer Station",
+        shape = "Island",
+        color = "Species") +
+   
+   ## 3a. Built in theme
+   theme_minimal() + 
+   
+   ## 3b. Editing the labels aesthetics
+   theme(plot.title = element_text(color = "black", size = 18, face = "bold", hjust = 0.5),
+         plot.subtitle = element_text(color = "gray41", size = 14, face = "bold", hjust = 0.5),
+         plot.caption = element_text(color = "gray65", face = "italic"),
+         axis.title.x = element_text(size = 15),
+         axis.title.y = element_text(size = 15)) +
+   
+   ## 3c. Change colors
+   scale_colour_manual(values =  c("darkorange", "purple", "cyan4")) +
+   
+   ## 3d. Faceting
+   #facet_wrap(vars(sex)) 
+   facet_grid(cols = vars(sex), rows = vars(island))
+
+```
+
+Now we are going to make the same plot incorporating the legend into the title and a pretty new theme!!
+
+```{r create prettier scatter}
+
+ggplot(na.omit(penguins)) +
+ 
+   ## 1. Choose your plot and aesthetics
+   geom_point(aes(x = body_mass_g, y = flipper_length_mm, color = species)) +
+   
+   ## 2. Label all the things
+   labs(x = "Body Mass (g)",
+        y = "Flipper Length (mm)",
+        
+        ## use html/markdown style to code the colors into the title
+        ## title : "Dimensions for adelie, chinstrap, and gentoos penguins"
+        ## We need to tell ggplot that:  html format text is coming up, what we want that text to look like, what the text says, and that html format text is over
+        title = "Dimensions for <b style='color:darkorange'>adelie,</b> <b style='color:purple'>chinstrap,</b> and <b style='color:cyan4'>gentoos</b> penguins",
+        
+        caption = "Data Source: Dr. Kristen Gorman LTER Palmer Station \nCreated for RLadies SB workshop") +
+   
+   ## 3a. Choose an 'hrbrthemes' theme
+   theme_ipsum_rc() +
+   
+   ## 3b. Editing the labels aesthetics
+   theme(plot.title = element_markdown(hjust = 0.5, size = 20),
+         plot.caption = element_text(color = "gray65", face = "italic", size = 8),
+         legend.position = "none") +
+   
+   ## 3c. Change colors
+   scale_colour_manual(values = col_pal) +
+   
+   ## 3d. Faceting
+   facet_grid(cols = vars(sex), rows = vars(island)) 
+
+```
+
+
+
+
 
 #####################################################
 ####**Part 2.** An
