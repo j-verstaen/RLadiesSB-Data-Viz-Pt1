@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ###**Outline**
 
 **Part 0.** Load packages
-**Part 1.** Juliette - TITLE HERE
+**Part 1.** Juliette - Basic ggplot(), putting the legend in the title, and themes
 **Part 2.** An - TITLE HERE
 **Part 3.** Sam - Plotting summary stats using `stat_summary()`
 
