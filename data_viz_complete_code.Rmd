@@ -47,8 +47,6 @@ We're going to create a standard scatter ggplot and show the 3 main things I do 
 I always do this part last because I spend forever on it, and I want to get the meat of the plot right first
 
 Then I’m going to show you how to represent your legend (if colors) in the title and some plot themes from the package ‘hrbrthemes’
-
-
 ```{r create scatter}
 
 ggplot(na.omit(penguins)) +
@@ -119,10 +117,6 @@ ggplot(na.omit(penguins)) +
    facet_grid(cols = vars(sex), rows = vars(island)) 
 
 ```
-
-
-
-
 
 #####################################################
 ####**Part 2.** An
@@ -385,4 +379,3 @@ ggplot(data = na.omit(penguins), aes(x = species, y = body_mass_g, shape = sex))
 
 # ggsave(plot = SC_simple, here::here("plots", "SC_simple.jpg"), width = 7, height = 7)
 ```
-
