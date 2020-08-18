@@ -18,51 +18,53 @@ List of resources we might want to get together and give people
 Workshop:
 https://github.com/allisonhorst/palmerpenguins
 
-Looking at the data and seeing what's what
-```{r}
+Load packages
+```{r load packages}
 # remotes::install_github("allisonhorst/palmerpenguins")
 library(palmerpenguins)
 library(ggplot2)
 library(tidyverse)
-# remotes::install_github("wilkelab/ggtext")
 library(hrbrthemes)
+# remotes::install_github("wilkelab/ggtext")
+library(ggtext)
 ```
 
-First things first before making any types of graphs is getting to know your data. For me knowing how many NA's there are and the class of each column/variable is the most important. Not knowing these things up front can cause weird things to happen (or things not to happen) so it's always good to know before hand. It's always best to know the structure of your data well enough that you know the general lay out of your plot. This step is skipped a lot because there's no real product that comes out of it and it takes a little bit of time. In the end though it's so worth it!
 
-Basic look into the data
-```{r}
-penguins <- penguins
+## Explore your data
+
+```{r explore data}
 
 head(penguins)
-summary(penguins) ## take the chance to addess the NA values in each column
-```
+summary(penguins) ## take the chance to address the NA values in each column
 
-Talk about the different classes and how they might mess up plotting (numeric/ character, an NA might mess that up; factor vs character)
-
-Exploring classes
-```{r}
-# long way:
+## checking out classes (the long way)
 class(penguins$species) ## factor
 
-# short way (would need a brief description of what lapply is..)
+# short way 
 lapply(penguins, class)
-## im actually not super sure when numeric versus integer comes into play for graphing... anyone?
-```
 
-Color pallette
-```{r}
-col_pal <- c("#008A82", "#57280F", "#03304A")
 ```
 
 
-```{r}
+## Color palette
+
+Create a vector of colors that we want to use in our plot. I know I want each penguin to have it's own color, so I picked 3 colors.
+```{r color palette}
+
+col_pal <- c("darkorange", "purple", "cyan4")
+
+```
+
+## Create your plot
+
+```{r create simple scatter}
 
 ggplot(na.omit(penguins)) +
-   geom_point(aes(x = body_mass_g, y = flipper_length_mm, color = species, shape = island), size = 2) +
-   theme_minimal() +
    
-   ## Labeling everything
+   ## 1. Choose your plot and aesthetics
+   geom_point(aes(x = body_mass_g, y = flipper_length_mm, color = species, shape = island), size = 2) +
+   
+   ## 2. Label all the things
    labs(x = "Body Mass (g)",
         y = "Flipper Length (mm)",
         title = "Exploring Palmer Station Penguins",
@@ -71,112 +73,64 @@ ggplot(na.omit(penguins)) +
         shape = "Island",
         color = "Species") +
    
-   ## Editing the labels aestetics
+   ## 3a. Built in theme
+   theme_minimal() + 
+   
+   ## 3b. Editing the labels aesthetics
    theme(plot.title = element_text(color = "black", size = 18, face = "bold", hjust = 0.5),
          plot.subtitle = element_text(color = "gray41", size = 14, face = "bold", hjust = 0.5),
          plot.caption = element_text(color = "gray65", face = "italic"),
          axis.title.x = element_text(size = 15),
          axis.title.y = element_text(size = 15)) +
    
-   ## change colors
-   scale_colour_manual(values = col_pal, aesthetics = "colour")+
-   facet_grid(cols = vars(sex)) 
+   ## 3c. Change colors
+   scale_colour_manual(values = col_pal) +
+   
+   ## 3d. Faceting
+   #facet_wrap(vars(sex)) 
+   facet_grid(cols = vars(sex), rows = vars(island))
 
-ggsave("plots/JV_simple.jpg", width = 10, height = 6, dpi=300) 
+
+#ggsave("plots/JV_simple.jpg", width = 10, height = 6, dpi=300) 
+
 ```
 
-Make the same plot but without a legend!! And with a pretty new theme. 
+Now we are going to make the same plot but with a pretty new theme and  incorporating the legend into the title!!
+
 ```{r}
 
 ggplot(na.omit(penguins)) +
+ 
+   ## 1. Choose your plot and aesthetics
    geom_point(aes(x = body_mass_g, y = flipper_length_mm, color = species)) +
-   theme_ipsum_rc() +
    
-   ## Labeling everything
+   ## 2. Label all the things
    labs(x = "Body Mass (g)",
         y = "Flipper Length (mm)",
-        ## use markdown style to code the colors into the title
-        title = "Dimensions for <b style='color:#008A82'>adelie,</b> <b style='color:#57280F'>chinstrap,</b> and <b style='color:#03304A'>gentoos</b> penguins",
-        caption = "Data Source: Dr. Kristen Gorman LTER Palmer Station") +
+        
+        ## use html/markdown style to code the colors into the title
+        ## title : "Dimensions for adelie, chinstrap, and gentoos penguins"
+        ## We need to tell ggplot that:  html format text is coming up, what we want that text to look like, what the text says, and that html format text is over
+        title = "Dimensions for <b style='color:darkorange'>adelie,</b> <b style='color:purple'>chinstrap,</b> and <b style='color:cyan4'>gentoos</b> penguins",
+        
+        caption = "Data Source: Dr. Kristen Gorman LTER Palmer Station \nCreated for RLadies SB workshop") +
    
-   ## Editing the labels aesthetics
-      theme(plot.title = element_markdown(hjust = 0.3),
-            plot.caption = element_text(color = "gray65", face = "italic", size = 8),
-            legend.position = "none") +
+   ## 3a. Choose an 'hrbrthemes' theme
+   theme_ipsum_rc() +
+   
+   ## 3b. Editing the labels aesthetics
+   theme(plot.title = element_markdown(hjust = 0.5, size = 20),
+         plot.caption = element_text(color = "gray65", face = "italic", size = 8),
+         legend.position = "none") +
+   
+   ## 3c. Change colors
+   scale_colour_manual(values = col_pal) +
+   
+   ## 3d. Faceting
+   facet_grid(cols = vars(sex), rows = vars(island)) 
 
-   ## change colors
-   scale_colour_manual(values = col_pal)+
-   facet_grid(cols = vars(sex)) 
-
-ggsave("plots/JV_prettier.jpg", width = 10, height = 6, dpi=300) 
+## ggsave("plots/JV_prettier.jpg", width = 10, height = 6, dpi=300) 
 ```
-
-
-
-
-
-
-## Bar plot:
-- stacked bar plot for each of the three years with total penguins on the y axis and three chunks of colors for the three penguins, also do it by island
-
-```{r}
-
-penguins_sampled <- penguins %>% 
-   mutate(island_add = "Island") %>% 
-   unite(island_species, c("species", "island"), sep = " on ", remove = FALSE) %>% 
-   unite(island_species, c("island_species", "island_add"), sep = " ") %>% 
-   mutate(island_species = fct_relevel(island_species, levels = c("Adelie on Biscoe Island", "Gentoo on Biscoe Island", "Adelie on Dream Island", "Chinstrap on Dream Island", "Adelie on Torgersen Island"))) %>% 
-   mutate(year = as.character(year))
-
-colors <- c("#B35B91", "#F0C6E7", "#B1611A", "#F5E3C6", "#4EBCD3")
-
-
-class(penguins_sampled$year)
-
-ggplot(na.omit(penguins_sampled)) +
-  stat_count(aes(x=year, fill=island_species), stat="identity", width = 0.6) +
-# geom_text(aes(label = 'island'))
-   theme_minimal() +
-   labs(x = "Year",
-        y = "Sample Count",
-        title = "Number of Penguins Sampled") + 
-   scale_fill_manual(values = colors, aesthetics = "fill") 
-
-
-```
-
-biscoe (A, G)
-dream (s, c)
-torgersen (a)
-
-order factor (bis A, bis G, dream s, dream c, torg a)
-
-
-## scatter with correlation line
-- geom point with bill size and weight, correlation line. bring the point home that you should really explore the data. do one with all the penguins and a line, and then one with 3 lines by penguins. will show that one of the penguins just has a smaller bill size and that you can't generalize by all penguins. maybe do one by penguin species and gender
-- remember, it can be really easy to make plots and assume because it looks like something is happening or not that that is the case because you can see it! always explore your data and play around with it, and think critically about what what your doing actually means and why
-
-
-# 008A82, 57280F, 03304A
-## do we want to intoduce spcial themes with all the stuffi did above? or too advanced
-## I want to capitilize the male and female labels in the grid but i need to do levels(penguins$sex) <- c("Female", "Male") after doing levels(penguins$sex) to check order
-## OR I want to get rid of those titles and put in male or female symbols, can use ggtext thoretically to use picutrees instead https://github.com/wilkelab/ggtext
-
-
-##do we want to remove NAs? or plot them like allison did 
-
-unique(penguins$bill_length_mm)
-summary(penguins$bill_length_mm)
-
- # scale_size(range = c("32.10", "39.23", "44.45", "43.92", "48.50", "59.60")) +
-
-
-
-#############
-
-
-
-
 
 
 
