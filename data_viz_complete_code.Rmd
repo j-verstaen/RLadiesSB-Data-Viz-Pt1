@@ -292,8 +292,8 @@ ggplot() +
   theme(
         # text
         plot.title = element_markdown(hjust = 0, size = 13),
-        # axis.text = element_text(color = "black", size = 10), 
-        # axis.title = element_text(size = 14), 
+        axis.text = element_text(color = "black", size = 10),
+        axis.title = element_text(size = 14),
         plot.caption = element_text(size = 7, hjust = 1, color = "gray", face = "italic"),
         # plot
         panel.border = element_rect(colour = "black", size = 0.7, fill = NA), 
