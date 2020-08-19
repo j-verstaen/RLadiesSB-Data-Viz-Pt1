@@ -35,18 +35,30 @@ library(ggimage)
 library(rlang)
 ```
 
+
+Look at the data!
+
+Since An, Sam and I have already explored the data more in depth, we're just going to causally look the data over here. However you should always explore your data before you do any plotting! Things to look into:
+What are the variables? Classes? Any NAs? Why are there NAs and will the missing data bias your plot?
+```{r}
+view(penguins)
+summary(penguins)
+```
+
+
 #####################################################
 ####**Part 1.** Juliette
 #####################################################
 
-We're going to create a standard scatter ggplot and show the 3 main things I do every time I create a plot:
+We're going to create a scatter plot.
+
+The main steps I take when creating a plot:
 1. Choose the type of plot you want and the aesthetics needed to make it happen
 2. Labels
 3. Make it look pretty! - for me this means: what the plot theme is, messing with things in the theme(), and playing with colors
 
-I always do this part last because I spend forever on it, and I want to get the meat of the plot right first
+Then I’m going to show you how to represent your legend colors in the title and some plot themes from the package ‘hrbrthemes’
 
-Then I’m going to show you how to represent your legend (if colors) in the title and some plot themes from the package ‘hrbrthemes’
 ```{r create scatter}
 
 ggplot(na.omit(penguins)) +
@@ -59,12 +71,12 @@ ggplot(na.omit(penguins)) +
         y = "Flipper Length (mm)",
         title = "Exploring Palmer Station Penguins",
         subtitle = "Dimensions and Attributes",
-        caption = "Data Source: Dr. Kristen Gorman LTER Palmer Station",
+        caption = "Data Source: Dr. Kristen Gorman LTER Palmer Station \nCreated for RLadies SB workshop",
         shape = "Island",
         color = "Species") +
    
    ## 3a. Built in theme
-   theme_minimal() + 
+   theme_minimal() +
    
    ## 3b. Editing the labels aesthetics
    theme(plot.title = element_text(color = "black", size = 18, face = "bold", hjust = 0.5),
@@ -77,7 +89,7 @@ ggplot(na.omit(penguins)) +
    scale_colour_manual(values =  c("darkorange", "purple", "cyan4")) +
    
    ## 3d. Faceting
-   #facet_wrap(vars(sex)) 
+   #facet_wrap(vars(island)) 
    facet_grid(cols = vars(sex), rows = vars(island))
 
 ```
@@ -91,6 +103,9 @@ ggplot(na.omit(penguins)) +
    ## 1. Choose your plot and aesthetics
    geom_point(aes(x = body_mass_g, y = flipper_length_mm, color = species)) +
    
+  ## 3c. Change colors
+   scale_colour_manual(values =   c("darkorange", "purple", "cyan4")) +
+  
    ## 2. Label all the things
    labs(x = "Body Mass (g)",
         y = "Flipper Length (mm)",
@@ -102,17 +117,14 @@ ggplot(na.omit(penguins)) +
         
         caption = "Data Source: Dr. Kristen Gorman LTER Palmer Station \nCreated for RLadies SB workshop") +
    
-   ## 3a. Choose an 'hrbrthemes' theme
-   theme_ipsum_rc() +
-   
+  ## 3a. Choose an 'hrbrthemes' theme need to do this before theme() because need to override
+  # theme_ipsum_rc() +
+  
    ## 3b. Editing the labels aesthetics
-   theme(plot.title = element_markdown(hjust = 0.5, size = 20),
+   theme(plot.title = element_markdown(hjust = 0.5, size = 15),
          plot.caption = element_text(color = "gray65", face = "italic", size = 8),
          legend.position = "none") +
-   
-   ## 3c. Change colors
-   scale_colour_manual(values = col_pal) +
-   
+
    ## 3d. Faceting
    facet_grid(cols = vars(sex), rows = vars(island)) 
 
