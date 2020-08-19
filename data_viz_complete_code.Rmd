@@ -15,6 +15,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 We'll be walking through the components necessary for constructing a basic ggplot, and also delve into some cool features for elevating the aesthetics of your plots.
 
+You can access many of the online resources we referenced while creating these plots (plus lots of great ggplot2 information, examples, etc.) in our Google Slides: https://docs.google.com/presentation/d/1sU2H89F5e409WpYilRqYAqu7DdXSAivccEa4y44xZ7c/edit?usp=sharing 
+
 *NOTE: Normally, you should take a critical look at your data, determine why NAs exist and if they might bias your results...we're skipping that part here and just omitting any NAs for the sake of time. But for when you do explore NAs, we suggest checking out the `naniar` package*
 
 ###**Outline**
@@ -24,8 +26,9 @@ We'll be walking through the components necessary for constructing a basic ggplo
 **Part 2.** An - Putting your ggplot() into a function, grids
 **Part 3.** Sam - Plotting summary stats using `stat_summary()`
 
-####**Part 0.** Load packages
+####**Part 0.** Load packages & explore ata
 ```{r}
+# load packages
 library(palmerpenguins) 
 library(tidyverse)
 library(ggtext) 
@@ -33,18 +36,12 @@ library(hrbrthemes)
 library(patchwork)
 library(ggimage)
 library(rlang)
-```
 
-
-Look at the data!
-
-Since An, Sam and I have already explored the data more in depth, we're just going to causally look the data over here. However you should always explore your data before you do any plotting! Things to look into:
-What are the variables? Classes? Any NAs? Why are there NAs and will the missing data bias your plot?
-```{r}
-view(penguins)
+# take a look at what we're working with - always good to do this before jumping into plot creation!
+# what are the variables? classes? any NAs? Why are there NAs and will these bias your results?
+View(penguins)
 summary(penguins)
 ```
-
 
 #####################################################
 ####**Part 1.** Juliette
@@ -247,7 +244,7 @@ grid
 ####**Part 3.** Sam
 #####################################################
 
-Here, we'll walk through plotting a combination of raw data and summary stats together on the same figure. There are two general approaches:
+I usually love seeing both the raw data and summary statistics plotted together on the same figure. Here, we'll walk through how to do just that. There are two general approaches:
 
 (1) calculate summary stats and save to a new data frame; plot raw data from original data frame and layer on summary stats from the new data frame -- this tends to require **more** code
 
@@ -321,9 +318,6 @@ ggplot() +
 # plot
 ##############################
 
-# NOTE: you can sub "pd" anywhere you see `position_jitterdodge(dodge.width = 0.8)` if you prefer
-# pd <- position_jitterdoge(dodge.width = 0.8)
-
 # plot raw data
 ggplot(data = na.omit(penguins), aes(x = species, y = body_mass_g, shape = sex)) +
   geom_point(alpha = 0.2, position = position_jitterdodge(dodge.width = 0.8)) + 
@@ -391,3 +385,4 @@ ggplot(data = na.omit(penguins), aes(x = species, y = body_mass_g, shape = sex))
 
 # ggsave(plot = SC_simple, here::here("plots", "SC_simple.jpg"), width = 7, height = 7)
 ```
+
