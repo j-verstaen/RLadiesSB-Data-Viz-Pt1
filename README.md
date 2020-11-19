@@ -15,6 +15,6 @@ install.packages("ggimage")
 install.packages("rlang")
 ```
 
-### Setup:
+### Code:
 
 Explore the code covered during this workshop in [data_viz_complete_code.Rmd](https://github.com/j-verstaen/RLadiesSB-Data-Viz-Pt1/blob/master/data_viz_complete_code.Rmd)
