@@ -185,6 +185,10 @@ Then, we're going to make a function to plot. I do this a lot when I'm exploring
 
 ```{r}
 # the function takes 3 arguments: island, species, and color
+name <- function(arguments) {
+  fxn <- arguments
+}
+
 island_spp <- function(which_island, which_species, which_color) {
   # same idea as a normal ggplot function, except now you're making your own!
   # step 1. filter the data frame to only include the island and species of interest
@@ -378,11 +382,5 @@ ggplot(data = na.omit(penguins), aes(x = species, y = body_mass_g, shape = sex))
         legend.box.background = element_rect(color = "black"))
 
 # title for use with ggtext() : "Body mass of female vs. male <b style='color:darkorange'>adelie,</b> <b style='color:purple'>chinstrap,</b> and <b style='color:cyan4'>gentoo</b> penguins"
-
-########################
-# Optional: save your plot as a .jpg, .pdf, etc. using ggsave()
-########################
-
-# ggsave(plot = SC_simple, here::here("plots", "SC_simple.jpg"), width = 7, height = 7)
 ```
 
